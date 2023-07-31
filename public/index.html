@@ -3,11 +3,43 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./style.css">
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+            crossorigin="anonymous"
+        >
         <title>MongoDB CRUD</title>
     </head>
-    <body>
-        <div>
-            <h1>MongoDB CRUD app</h1>
+    <body onload="getAllPosts()" class="bg-success">
+        <h1 class="text-center bg-warning p-3 border border-1">MongoDB CRUD app</h1>
+        <div class="d-flex justify-content-center">
+            <form id="createPost" class="m-3">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Post Title</span>
+                    <input
+                        required
+                        type="text"
+                        class="form-control"
+                        aria-label="Sizing example input"
+                        aria-describedby="inputGroup-sizing-default"
+                    >
+                </div>
+                <br>
+                <div class="input-group">
+                    <span class="input-group-text">Post Text</span>
+                    <textarea required class="form-control" aria-label="With textarea"></textarea>
+                </div>
+                <br>
+                <button type="submit" class="btn btn-primary border border-info">Post</button>
+            </form>
         </div>
+        <div id="secondDiv">
+            <div id="allPosts"></div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+        <script src="./main.mjs"></script>
     </body>
 </html>

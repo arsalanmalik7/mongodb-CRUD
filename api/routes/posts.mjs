@@ -39,7 +39,7 @@ router.post('/post', async (req, res, next) => {
     })
     console.log("insertResponse: ", insertResponse)
 
-    res.send("Posts created!")
+    res.send("Post created!")
 
 })
 
@@ -54,21 +54,27 @@ router.get('/posts', async (req, res, next) => {
 
 })
 
-router.get('/post/:postId', (req, res, next) => {
+router.get('/post/:postId', async (req, res, next) => {
 
-    if ((req.params.postId)) {
-        res.status(403).send(`post id must be a valid id`)
-    }
+    const postId = req.params.postId;
 
-    for (let i = 0; i < posts.length; i++) {
-        if (posts[i].id === req.params.postId) {
-            res.send(posts[i]);
-            return;
+    try {
+        const post = await col.findOne({ id: postId });
+        if (post) {
+            console.log(post);
+            res.send(post);
+        } else {
+            res.status(404).send("Post not found " + postId);
         }
+    } catch (error) {
+        console.error("Error finding post:", error);
+        res.status(500).send("Error finding post");
     }
-    res.send('post not found with id ' + req.params.postId);
+
 })
-router.put('/post/:postId', (req, res, next) => {
+
+
+router.put('/post/:postId', async (req, res, next) => {
     if (!req.params.postId
         || !req.body.text
         || !req.body.title) {
@@ -79,31 +85,45 @@ router.put('/post/:postId', (req, res, next) => {
         }
         `)
     }
-    for (let i = 0; i < posts.length; i++) {
-        if (posts[i].id === req.params.postId) {
-            posts[i] = {
-                text: req.body.text,
-                title: req.body.title,
-            }
-            res.send('post updated with id ' + req.params.postId);
-            return;
+    const post = req.params.postId;
+    try {
+        const postId = await col.findOne({ id: post });
+        const { title, text } = req.body;
+
+        const updatedPost = col.findOneAndUpdate(
+            { id: post },
+            { $set: { title: title, text: text } },
+            { returnOriginal: false }
+        );
+        if (updatedPost) {
+            console.log("Post updated:", (await updatedPost).value);
+            res.send("Post updated with id " + post);
+        } else {
+            res.status(404).send("Post not found " + req.params.postId);
         }
+    } catch (error) {
+        console.error("Error finding post:", error);
+        res.status(500).send("Error finding post");
     }
-    res.send('post not found with id ' + req.params.postId);
 })
-router.delete(`/post/:postId`, (req, res, next) => {
+router.delete(`/post/:postId`, async (req, res, next) => {
     if (!req.params.postId) {
         res.status(403).send(`post id must be a valid id`)
     }
-    for (let i = 0; i < posts.length; i++) {
-        if (posts[i].id === req.params.postId) {
-            posts.splice(i, 1);
-            res.send('post deleted with id ' + req.params.postId);
 
-            return;
-        }
+    const post = req.params.postId;
+    const filter = { id: post }
+    const postId = await col.findOne({ id: post });
+
+    const deletedDoc = await col.deleteOne(filter);
+    if (deletedDoc.deletedCount === 1) {
+        console.log("Successfully deleted one document.");
+        res.send("Post deleted successfully!")
+    } else {
+        console.log("No documents matched the query. Deleted 0 documents.");
+        res.send('post not found with id ' + post);
     }
-    res.send('post not found with id ' + req.params.postId);
+
 
 })
 export default router
