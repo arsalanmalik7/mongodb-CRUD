@@ -1,48 +1,99 @@
 import express from 'express'
 import { client } from './../../mongodb.mjs';
-import bcrypt from 'bcrypt'
+import {
+    stringToHash,
+    varifyHash,
+    validateHash
+} from "bcrypt-inzi"
 
 const db = client.db('cruddb');
-const users = db.collection("users");
+const usersCollection = db.collection("usersCollection");
 
 let router = express.Router()
 
 
 router.post('/signup', async (req, res, next) => {
     console.log("Sign up to this page ");
-    const { username, password } = req.body
 
-    const existingUser = await users.findOne({ username })
-    if (existingUser) {
-        return res.status(400).json('User already exists');
+    if (
+        !req.body.firstName
+        || !req.body.lastName
+        || !req.body.email
+        || !req.body.password
+
+    ) {
+        res.status(403);
+        res.send(`required parameters missing, 
+        example request body:
+        {
+            firstName: "firstName",
+            lastName: "lastName",
+            email: "some@email.com",
+            password: "some$password"
+        } `);
+        return;
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = users.insertOne({
-        username,
-        password: hashedPassword
-    })
-    await users.insertOne({ newUser });
-    res.status(201).send("User created Successfuly!")
-    console.log(username)
-    console.log(password)
+
+
+    req.body.email = req.body?.email.toLowerCase();
+
+    try {
+        const result = await usersCollection.findOne({ email: req.body.email });
+        console.log("result ", result)
+
+        const hashPassword = await stringToHash(req.body.password);
+
+        if (!result) {
+            const insertedUser = await usersCollection.insertOne({
+                firstname: req.body.firstName,
+                lastName: req.body.lastName,
+                email: req.body.email,
+                password: hashPassword,
+                createdOn: new Date()
+            })
+            console.log("insertedUser ", insertedUser);
+            res.status(200).send({ message: "Signup Successfully!" });
+        } else {
+            res.status(403).send({ message: "user already exist" })
+        }
+    } catch (error) {
+        console.log("error getting data mongodb: ", error);
+        res.status(500).send('server error, please try later');
+
+    }
 })
+
 
 router.post('/login', async (req, res, next) => {
     console.log("Log in to this page");
-    const { username, password } = req.body
-    const user = await users.findOne({ username })
-    if (!user) {
-        res.status(401).send("Invalid Credentials")
+    if (
+        !req.body.email
+        || !req.body.password
+    ) {
+        res.status(403);
+        res.send(`required parameters missing, 
+        example request body:
+        {
+            email: "some@email.com",
+            password: "some$password",
+        } `);
+        return;
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    req.body.email = req.body.email.toLowerCase()
 
-    if (!isValidPassword) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+    const result = await usersCollection.findOne({ email: req.body.email });
+
+    if (!result) {
+        res.status(403).send({ message: "email or password incorect" })
+    } else {
+        const isMatch = varifyHash(req.body.password, result.password)
+
+        if (isMatch) {
+            
+        }
     }
-
-    res.status(200).send("Login Successfully!");
 })
 
 

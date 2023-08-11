@@ -1,22 +1,11 @@
 import express from 'express'
-import { nanoid } from 'nanoid'
 import { client } from './../../mongodb.mjs'
+import { ObjectId } from 'mongodb';
 
 const db = client.db('cruddb');
 const col = db.collection("posts");
 
 let router = express.Router()
-
-
-
-let posts = [
-    {
-        id: nanoid(),
-        title: " abc title",
-        text: "some text"
-    }
-]
-
 
 
 router.post('/post', async (req, res, next) => {
@@ -33,7 +22,6 @@ router.post('/post', async (req, res, next) => {
     }
 
     const insertResponse = await col.insertOne({
-        id: nanoid(),
         title: req.body.title,
         text: req.body.text
     })
@@ -59,12 +47,12 @@ router.get('/post/:postId', async (req, res, next) => {
     const postId = req.params.postId;
 
     try {
-        const post = await col.findOne({ id: postId });
-        if (post) {
-            console.log(post);
-            res.send(post);
+        const postId = await col.findOne({ _id: new ObjectId(req.params.postId) });
+        if (postId) {
+            console.log(postId);
+            res.send(postId);
         } else {
-            res.status(404).send("Post not found " + postId);
+            res.status(404).send("Post not found ");
         }
     } catch (error) {
         console.error("Error finding post:", error);
@@ -75,29 +63,24 @@ router.get('/post/:postId', async (req, res, next) => {
 
 
 router.put('/post/:postId', async (req, res, next) => {
-    if (!req.params.postId
-        || !req.body.text
-        || !req.body.title) {
-        res.status(403).send(`example put body: 
-        {
-            title: "updated title",
-            text: "updated text"
-        }
-        `)
+    if (!ObjectId.isValid(req.params.postId)) {
+        res.status(403).send(`Invalid post id`);
+        return;
     }
-    const post = req.params.postId;
-    try {
-        const postId = await col.findOne({ id: post });
-        const { title, text } = req.body;
 
-        const updatedPost = col.findOneAndUpdate(
-            { id: post },
-            { $set: { title: title, text: text } },
-            { returnOriginal: false }
+    let updatedData = {};
+    if (req.body.title) { updatedData.title = req.body.title }
+    if (req.body.text) { updatedData.text = req.body.text }
+
+    try {
+
+        const updatedPost = col.updateOne(
+            { _id: new ObjectId(req.params.postId) },
+            { $set: updatedData }
         );
         if (updatedPost) {
-            console.log("Post updated:", (await updatedPost).value);
-            res.send("Post updated with id " + post);
+            console.log("Post updated:", await updatedPost);
+            res.send("Post updated!");
         } else {
             res.status(404).send("Post not found " + req.params.postId);
         }
@@ -107,21 +90,22 @@ router.put('/post/:postId', async (req, res, next) => {
     }
 })
 router.delete(`/post/:postId`, async (req, res, next) => {
-    if (!req.params.postId) {
-        res.status(403).send(`post id must be a valid id`)
+    if (!ObjectId.isValid(req.params.postId)) {
+        res.status(403).send(`Invalid post id`);
+        return;
     }
 
-    const post = req.params.postId;
-    const filter = { id: post }
-    const postId = await col.findOne({ id: post });
+    const postId = await col.findOne({ _id: new ObjectId(req.params.postId) });
+    const filter = { _id: postId }
 
-    const deletedDoc = await col.deleteOne(filter);
-    if (deletedDoc.deletedCount === 1) {
-        console.log("Successfully deleted one document.");
-        res.send("Post deleted successfully!")
-    } else {
-        console.log("No documents matched the query. Deleted 0 documents.");
-        res.send('post not found with id ' + post);
+
+    try {
+        const deleteResponse = await col.deleteOne({ _id: new ObjectId(req.params.postId) })
+        console.log("deleteResponse; ", deleteResponse);
+        res.send("Post deleted!")
+    } catch (error) {
+        console.log("error deleting mongodb: ", error);
+        res.status(500).send('server error, please try later');
     }
 
 
