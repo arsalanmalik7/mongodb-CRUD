@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./style.css">
+        <title>Mongidb CRUD</title>
+    </head>
+    <body>
+        <div id="form">
+            <form class="form">
+                <span class="input-span">
+                    <label for="email" class="label">Email</label>
+                    <input
+                        type="email"
+                        name="email"
+                        id="email"
+                        required
+                    >
+                </span>
+                <span class="input-span">
+                    <label for="password" class="label">Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        required
+                    >
+                </span>
+                <span class="span">
+                    <a href="#">Forgot password?</a>
+                </span>
+                <input class="submit" type="submit" value="Log in">
+                <span class="span">Don't have an account?
+                    <a href="#">Sign up</a>
+                </span>
+            </form>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.js"></script>
+        <script src="./login.mjs"></script>
+    </body>
+</html>
