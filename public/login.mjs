@@ -10,9 +10,11 @@ signupForm.addEventListener("submit", async (event) => {
             email: email,
             password: password
         })
-        console.log("resp: ", await resp.request);
 
-        if (resp.status === 200) {
+        console.log("resp: ", await (resp));
+        console.log("resp: ", await (resp));
+
+        if (await (resp.status) === 200) {
             window.location.href = './index.html';
         }
 

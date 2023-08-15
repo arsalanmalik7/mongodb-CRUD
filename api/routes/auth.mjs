@@ -103,9 +103,12 @@ router.post('/login', async (req, res, next) => {
                     expiresIn: '24h'
                 })
 
+                const expiresCookie = new Date();
+                expiresCookie.setHours(expiresCookie.getHours() + 1)
                 res.cookie('token', token, {
-                    httpOnly: true,
-                    secure: true
+                    httpOnly: true  ,
+                    secure: true,
+                    expires: new Date(Date.now() + 900000)
                 })
 
                 res.send({
@@ -121,7 +124,7 @@ router.post('/login', async (req, res, next) => {
     } catch (error) {
 
         console.log("error getting data", error)
-        res.status(500), send("server error, please try later")
+        res.status(500).send("server error, please try later")
     }
 
 })

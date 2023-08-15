@@ -2,11 +2,22 @@
 let posts = document.querySelector("#allPosts");
 let createPost = document.querySelector("#createPost");
 
+const axiosInstance = axios.create({ baseURL: '/api' });
+
+axiosInstance.interceptors.response.use((response) => {
+    console.log('response', response)
+    document.cookie
+    if (response.status === 401) {
+        // redirect to login
+        window.location.href = './login.html'
+    }
+})
+
 createPost.addEventListener('submit', (event) => {
     event.preventDefault();
     let title = event.target[0].value;
     let text = event.target[1].value;
-    axios.post('/api/post', {
+    axiosInstance.post('/post', {
         title: title,
         text: text
     })
@@ -36,7 +47,7 @@ createPost.addEventListener('submit', (event) => {
 })
 window.getAllPosts = function () {
 
-    axios.get('/api/posts', {
+    axiosInstance.get('/posts', {
         withCredentials: true
     })
         .then(function (response) {
@@ -54,9 +65,8 @@ window.getAllPosts = function () {
             })
             allPosts.innerHTML = postHtml
         })
-        .catch(function (error) {
-            console.log(error);
-            if (error.response.status === 401) {
+        .catch(function (response) {
+            if (response.status === 401) {
                 window.location.href = './login.html'
             }
         })
@@ -65,7 +75,7 @@ window.deletePost = function (postId) {
 
     console.log("delete: ", postId);
 
-    axios.delete(`/api/post/${postId}`)
+    axiosInstance.delete(`/post/${postId}`)
         .then(function (response) {
 
 
@@ -133,7 +143,7 @@ window.updatePost = function (postId) {
     const updatedTitle = document.querySelector(`#title-${postId}`).value;
     const updatedText = document.querySelector(`#text-${postId}`).value;
 
-    axios.put(`/api/post/${postId}`, {
+    axiosInstance.put(`/post/${postId}`, {
         title: updatedTitle,
         text: updatedText
     })
@@ -149,23 +159,3 @@ window.updatePost = function (postId) {
 }
 
 
-// Add a request interceptor
-axios.interceptors.request.use(function (config) {
-    // Do something before request is sent
-    return config;
-}, function (error) {
-    // Do something with request error
-    return Promise.reject(error);
-});
-
-// Add a response interceptor
-axios.interceptors.response.use(function (response) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
-    return response;
-}, function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    console.log(Promise.reject(error));
-    return Promise.reject(error);
-});

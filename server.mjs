@@ -18,6 +18,8 @@ import authRouter from './api/index.mjs';
 app.use('/api', authRouter)
 
 
+app.use(express.static(path.join(__dirname, 'public')))
+
 app.use((req, res, next) => {
     console.log("cookies; ", req.cookies)
     
@@ -48,7 +50,6 @@ app.use((req, res, next) => {
 app.use('/api', postRouter);
 
 
-app.use(express.static(path.join(__dirname, 'public')))
 
 
 const PORT = process.env.Port || 3000
