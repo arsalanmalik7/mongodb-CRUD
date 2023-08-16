@@ -74,7 +74,7 @@ window.getAllPosts = function () {
         .catch(function (error) {
             console.log(error.response.status)
             if (error.response.status === 401) {
-                window.location.href = './login.html'
+                window.location.href = './index.html'
             }
         })
 }
