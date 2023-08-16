@@ -11,8 +11,8 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-import postRouter from './api/index.mjs';
-import authRouter from './api/index.mjs';
+import postRouter from './api/routes/posts.mjs';
+import authRouter from './api/routes/auth.mjs';
 
 
 app.use('/api', authRouter)

@@ -6,20 +6,19 @@ signupForm.addEventListener("submit", async (event) => {
     const password = document.querySelector("#password").value;
 
     try {
-        const resp = axios.post('/api/login', {
+        const response = await axios.post('/api/login', {
             email: email,
             password: password
         })
 
-        console.log("resp: ", await (resp));
-        console.log("resp: ", await (resp));
+        console.log("resp: ", response.status);
 
-        if (await (resp.status) === 200) {
-            window.location.href = './index.html';
+        if ( (response.status) === 200) {
+            window.location.href = './main.html';
         }
 
-    } catch (error) {
-        console.log(error)
+    } catch (response) {
+        console.log(response)
     }
 
 })

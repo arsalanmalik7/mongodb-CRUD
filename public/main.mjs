@@ -2,16 +2,20 @@
 let posts = document.querySelector("#allPosts");
 let createPost = document.querySelector("#createPost");
 
-const axiosInstance = axios.create({ baseURL: '/api' });
+const axiosInstance = axios.create({
+    baseURL: '/api',
+    withCredentials: true
 
-axiosInstance.interceptors.response.use((response) => {
-    console.log('response', response)
-    document.cookie
-    if (response.status === 401) {
-        // redirect to login
-        window.location.href = './login.html'
-    }
-})
+});
+
+// axiosInstance.interceptors.response.use((response) => {
+//     console.log('response', response)
+//     document.cookie
+//     if (response.status === 401) {
+//         // redirect to login
+//         window.location.href = './login.html'
+//     }
+// })
 
 createPost.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -19,7 +23,7 @@ createPost.addEventListener('submit', (event) => {
     let text = event.target[1].value;
     axiosInstance.post('/post', {
         title: title,
-        text: text
+        text: text,
     })
         .then(function (response) {
             let postCreated = document.createElement("div");
@@ -27,6 +31,7 @@ createPost.addEventListener('submit', (event) => {
             postCreated.setAttribute("class", "postCreated")
             responseText.setAttribute("class", "responseText")
             responseText.innerText = response.data;
+            console.log(response)
             postCreated.appendChild(responseText);
 
             let parent = event.target;
@@ -41,16 +46,17 @@ createPost.addEventListener('submit', (event) => {
                 postCreated.remove();
             }, 2000);
             getAllPosts();
+        }).catch(function (error){
+            console.log(error)
         })
 
 
 })
 window.getAllPosts = function () {
 
-    axiosInstance.get('/posts', {
-        withCredentials: true
-    })
+    axiosInstance.get('/posts')
         .then(function (response) {
+            console.log(response)
             let allPosts = document.querySelector("#allPosts");
             let postHtml = '';
             response.data.map((eachPost) => {
@@ -65,8 +71,9 @@ window.getAllPosts = function () {
             })
             allPosts.innerHTML = postHtml
         })
-        .catch(function (response) {
-            if (response.status === 401) {
+        .catch(function (error) {
+            console.log(error.response.status)
+            if (error.response.status === 401) {
                 window.location.href = './login.html'
             }
         })

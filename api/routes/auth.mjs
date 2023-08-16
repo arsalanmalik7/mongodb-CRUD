@@ -37,11 +37,10 @@ router.post('/signup', async (req, res, next) => {
     }
 
 
-
-    req.body.email = req.body?.email.toLowerCase();
+    //  req.body.email = req.body.email.toLowerCase();
 
     try {
-        const result = await usersCollection.findOne({ email: req.body.email });
+        const result = await usersCollection.findOne({ email: req.body.email.toLowerCase() });
         console.log("result ", result)
 
         const hashPassword = await stringToHash(req.body.password);
@@ -50,7 +49,7 @@ router.post('/signup', async (req, res, next) => {
             const insertedUser = await usersCollection.insertOne({
                 firstname: req.body.firstName,
                 lastName: req.body.lastName,
-                email: req.body.email,
+                email: req.body.email.toLowerCase(),
                 password: hashPassword,
                 createdOn: new Date()
             })
@@ -116,7 +115,7 @@ router.post('/login', async (req, res, next) => {
                 });
                 return;
             } else {
-                res.status(4001).send({
+                res.status(401).send({
                     message: "email or password incorrect"
                 })
             }
